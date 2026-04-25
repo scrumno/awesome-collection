@@ -6,9 +6,13 @@ namespace DigitalCollective\YandexCaptcha\Infrastructure\Http;
 
 use DigitalCollective\YandexCaptcha\Domain\Exception\CaptchaVerificationFailed;
 use DigitalCollective\YandexCaptcha\Domain\Service\CaptchaVerifierInterface;
-use DigitalCollective\YandexCaptcha\Domain\ValueObject\VerificationResult;
 use DigitalCollective\YandexCaptcha\Domain\ValueObject\YandexCaptchaToken;
-use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExceptionInterface;
+use DigitalCollective\YandexCaptcha\Infrastructure\Http\Enum\StatusType;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class YandexCaptchaVerifier implements CaptchaVerifierInterface
@@ -17,10 +21,17 @@ final readonly class YandexCaptchaVerifier implements CaptchaVerifierInterface
 
     public function __construct(
         private HttpClientInterface $httpClient,
-        private string $serverKey,
+        private string              $serverKey,
     ) {}
 
-    public function verify(YandexCaptchaToken $token, ?string $clientIp = null): VerificationResult
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    public function verify(YandexCaptchaToken $token, ?string $clientIp = null): Response
     {
         $query = [
             'secret' => $this->serverKey,
@@ -29,25 +40,24 @@ final readonly class YandexCaptchaVerifier implements CaptchaVerifierInterface
 
         if ($clientIp !== null) $query['ip'] = $clientIp;
 
-        try {
-            $response = $this->httpClient->request('GET', self::ENDPOINT, [
-                'query' => $query,
-                'timeout' => 5.0,
-            ]);
+        $response = $this->httpClient->request('GET', self::ENDPOINT, [
+            'query' => $query,
+            'timeout' => 5.0,
+        ]);
 
-            $statusCode = $response->getStatusCode();
-            if ($statusCode !== 200)
-                throw CaptchaVerificationFailed::unexpectedStatus($statusCode);
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200)
+            throw CaptchaVerificationFailed::unexpectedStatus($statusCode);
 
-            /** @var array{status?: string, message?: string, host?: string} $data */
-            $data = $response->toArray(throw: false);
-        } catch (HttpClientExceptionInterface $e) {
-            throw CaptchaVerificationFailed::transportError($e);
-        }
+        /** @var array{status?: string, message?: string, host?: string} $data */
+        $data = $response->toArray(throw: false);
 
-        if ($data['status'] === 'ok')
-            return VerificationResult::success(($data['host'] ?? ''));
+        return match ($data['status']) {
+            StatusType::OK => new Response(isSuccess: true, message: 'ok'),
 
-        return VerificationResult::failure([($data['message'] ?? 'unknown')]);
+            StatusType::Failed => new Response(isSuccess: false, message: $data['message']),
+
+            default => new Response(isSuccess: false),
+        };
     }
 }

@@ -12,7 +12,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $container): void {
-    $services = $container->services()
+    $services   = $container->services()
         ->defaults()
         ->autowire(false)
         ->autoconfigure(false);

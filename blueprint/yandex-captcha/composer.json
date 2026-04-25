@@ -1,6 +1,6 @@
 {
     "name": "digital-collective/yandex-captcha",
-    "description": "Yandex SmartCaptcha verifier as Symfony Bundle, DDD layout",
+    "description": "Yandex SmartCaptcha verifier as Symfony Bundlet",
     "type": "symfony-bundle",
     "license": "MIT",
     "require": {

@@ -32,13 +32,9 @@ final readonly class VerifyCaptchaController implements PresentationControllerIn
             $status = $res->isSuccess ? Response::HTTP_OK : Response::HTTP_BAD_REQUEST;
 
             return new JsonResponse(
-                [
-                    'success' => $res->isSuccess,
-                    'errors' => $res->errors,
-                ],
+                ['isSuccess' => $res->isSuccess],
                 $status
             );
-
         } catch (YandexCaptchaException $e) {
             return new JsonResponse([
                 'success' => false,
