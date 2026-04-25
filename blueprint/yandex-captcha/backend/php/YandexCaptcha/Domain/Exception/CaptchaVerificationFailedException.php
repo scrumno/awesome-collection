@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DigitalCollective\YandexCaptcha\Domain\Exception;
 
-class CaptchaVerificationFailed extends \RuntimeException implements YandexCaptchaException
+class CaptchaVerificationFailedException extends \RuntimeException implements YandexCaptchaException
 {
     public static function transportError(\Throwable $previous): self
     {

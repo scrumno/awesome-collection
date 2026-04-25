@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DigitalCollective\YandexCaptcha\Domain\Exception;
 
-class EmptyYandexCaptchaToken extends \InvalidArgumentException implements YandexCaptchaException
+class EmptyYandexCaptchaTokenException extends \InvalidArgumentException implements YandexCaptchaException
 {
     public static function create(): self
     {

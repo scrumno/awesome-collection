@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DigitalCollective\YandexCaptcha\Infrastructure\Http;
 
-use DigitalCollective\YandexCaptcha\Domain\Exception\CaptchaVerificationFailed;
+use DigitalCollective\YandexCaptcha\Domain\Exception\CaptchaVerificationFailedException;
 use DigitalCollective\YandexCaptcha\Domain\Service\CaptchaVerifierInterface;
 use DigitalCollective\YandexCaptcha\Domain\ValueObject\YandexCaptchaToken;
 use DigitalCollective\YandexCaptcha\Infrastructure\Http\Enum\StatusType;
@@ -17,7 +17,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class YandexCaptchaVerifier implements CaptchaVerifierInterface
 {
-    private const ENDPOINT = 'https://smartcaptcha.yandexcloud.net/validate';
+    private const string ENDPOINT = 'https://smartcaptcha.yandexcloud.net/validate';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -47,7 +47,7 @@ final readonly class YandexCaptchaVerifier implements CaptchaVerifierInterface
 
         $statusCode = $response->getStatusCode();
         if ($statusCode !== 200)
-            throw CaptchaVerificationFailed::unexpectedStatus($statusCode);
+            throw CaptchaVerificationFailedException::unexpectedStatus($statusCode);
 
         /** @var array{status?: string, message?: string, host?: string} $data */
         $data = $response->toArray(throw: false);
