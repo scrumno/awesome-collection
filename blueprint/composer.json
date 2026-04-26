@@ -1,6 +1,6 @@
 {
-    "name": "digital-collective/yandex-captcha",
-    "description": "Yandex SmartCaptcha verifier as Symfony Bundlet",
+    "name": "digital-collective/awesome-collection",
+    "description": "Awesome collection of Symfony bundles and tools",
     "type": "symfony-bundle",
     "license": "MIT",
     "require": {
@@ -17,7 +17,9 @@
     },
     "autoload": {
         "psr-4": {
-            "DigitalCollective\\": "backend/php/"
+            "DigitalCollective\\Shared\\": "/Shared/backend/php/Shared",
+            "DigitalCollective\\CDEK\\": "/CDEK/backend/php",
+            "DigitalCollective\\YandexCaptcha\\": "/yandex-captcha/backend/php/YandexCaptcha"
         }
     },
     "config": {
